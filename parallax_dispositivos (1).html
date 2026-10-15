@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electronova | Dispositivos Electrónicos</title>
+<style>
+:root{--bg:#07111f;--card:#0e1d31;--text:#eef7ff;--muted:#a9bdd2;--accent:#39d9ff;--accent2:#7c5cff}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+img,svg{display:block}
+
+/* Barra de progreso y navegación */
+.progress{position:fixed;top:0;left:0;height:3px;width:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transform:scaleX(0);transform-origin:left;z-index:100}
+header{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 28px;display:flex;justify-content:space-between;align-items:center;mix-blend-mode:difference}
+.logo{font-weight:800;font-size:1.2rem;color:#fff;letter-spacing:.5px}
+header span{font-size:.85rem;color:#fff;opacity:.8}
+
+/* HERO con capas parallax */
+.hero{position:relative;height:100vh;overflow:hidden;display:grid;place-items:center;text-align:center}
+.layer{position:absolute;border-radius:50%;will-change:transform}
+.l1{width:520px;height:520px;left:-160px;top:6%;background:radial-gradient(circle,#7c5cff99,transparent 70%)}
+.l2{width:620px;height:620px;right:-200px;bottom:-120px;background:radial-gradient(circle,#39d9ff88,transparent 70%)}
+.l3{width:14px;height:14px;left:22%;top:30%;background:var(--accent);box-shadow:0 0 30px 8px var(--accent)}
+.l4{width:10px;height:10px;right:24%;top:24%;background:#fff;box-shadow:0 0 24px 6px #7c5cff}
+.l5{width:18px;height:18px;right:14%;bottom:26%;background:var(--accent2);box-shadow:0 0 30px 8px var(--accent2)}
+.grid-bg{position:absolute;inset:-20% 0;background-image:linear-gradient(#ffffff0a 1px,transparent 1px),linear-gradient(90deg,#ffffff0a 1px,transparent 1px);background-size:60px 60px;will-change:transform}
+.hero-content{position:relative;z-index:2;padding:0 20px}
+.badge{display:inline-block;padding:8px 16px;border:1px solid #39d9ff55;border-radius:999px;color:var(--accent);background:#39d9ff0d;font-size:.9rem}
+h1{font-size:clamp(2.8rem,9vw,8rem);line-height:.92;margin:24px 0;position:relative}
+.hero p{color:var(--muted);max-width:620px;margin:0 auto;font-size:1.1rem;line-height:1.6}
+.scroll-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);color:var(--muted);font-size:.85rem;z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px}
+.scroll-hint i{width:1px;height:42px;background:linear-gradient(var(--accent),transparent);animation:drop 1.6s infinite}
+@keyframes drop{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ===== PORTADA ANIMADA ===== */
+#boot{position:fixed;inset:0;z-index:200;background:radial-gradient(circle at 50% 40%,#0d2440,#050b14 70%);display:grid;place-items:center;animation:bootfail .4s 7s forwards}
+@keyframes bootfail{to{opacity:0;visibility:hidden}}
+.boot-in{width:min(440px,86vw);font-family:Consolas,monospace}
+.boot-logo{font-family:Segoe UI,Arial,sans-serif;font-size:2.1rem;font-weight:800;color:var(--accent);text-align:center;margin-bottom:26px;text-shadow:0 0 26px #39d9ffaa}
+.boot-bar{height:6px;border-radius:99px;background:#ffffff14;overflow:hidden}
+.boot-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));box-shadow:0 0 16px var(--accent)}
+.boot-row{display:flex;justify-content:space-between;margin-top:12px;color:var(--muted);font-size:.85rem}
+.boot-row b{color:#fff}
+#bootLog{list-style:none;margin-top:18px;color:#5f86a8;font-size:.78rem;line-height:1.7;min-height:130px}
+#bootLog li:before{content:"> ";color:var(--accent)}
+#bootLog li:last-child{color:#35e59a}
+
+#circuit{position:absolute;inset:0;width:100%;height:100%}
+.spot{position:absolute;inset:0;background:radial-gradient(520px circle at var(--mx,50%) var(--my,45%),#39d9ff26,transparent 65%);pointer-events:none}
+.scan{position:absolute;inset:0;pointer-events:none;z-index:4;overflow:hidden;background:repeating-linear-gradient(0deg,#ffffff06 0 1px,transparent 1px 3px)}
+.scan:after{content:"";position:absolute;left:0;right:0;height:150px;background:linear-gradient(180deg,transparent,#39d9ff14,transparent);animation:sweep 6s linear infinite}
+@keyframes sweep{from{top:-170px}to{top:100%}}
+
+.hud{position:absolute;inset:0;margin:auto;width:min(92vw,100vh,860px);height:min(92vw,100vh,860px);pointer-events:none;z-index:1}
+.hud svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.rg1{animation:spin 70s linear infinite}.rg2{animation:spin 42s linear infinite reverse}.rg3{animation:spin 95s linear infinite}
+.rg1,.rg2,.rg3{transform-origin:0 0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.wave{position:absolute;inset:22%;border-radius:50%;border:1px solid #39d9ff66;animation:wave 4.8s ease-out infinite}
+@keyframes wave{from{transform:scale(.25);opacity:.8}to{transform:scale(1.55);opacity:0}}
+
+.floaters{position:absolute;inset:0;z-index:1;pointer-events:none}
+.fl{position:absolute;width:clamp(56px,8.5vw,118px);aspect-ratio:1}
+.fl-in{width:100%;height:100%;padding:14%;border-radius:26%;background:linear-gradient(145deg,#12304acc,#0a1a2d99);border:1px solid #39d9ff55;box-shadow:0 0 32px #39d9ff33,inset 0 0 20px #39d9ff1a;backdrop-filter:blur(6px)}
+.fl-in svg{width:100%;height:100%;filter:drop-shadow(0 0 8px #39d9ff88)}
+
+.hudtxt{position:absolute;z-index:3;font-family:Consolas,monospace;font-size:.78rem;color:#7fe7ff;line-height:1.7;letter-spacing:1px;opacity:.85}
+.hudtxt b{display:block;color:#35e59a}
+.hudtxt.tl{left:28px;top:84px}.hudtxt.tr{right:28px;top:84px;text-align:right}
+.hudtxt.bl{left:28px;bottom:36px}.hudtxt.br{right:28px;bottom:36px;text-align:right}
+
+.badge:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#35e59a;box-shadow:0 0 10px #35e59a;margin-right:10px;animation:blink 1.4s infinite}
+.line{display:block;overflow:hidden;padding:.1em .1em .14em;margin:-.1em 0 -.14em}
+.line span{display:inline-block;position:relative;background:linear-gradient(90deg,#fff,#39d9ff,#7c5cff,#39d9ff,#fff);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 7s linear infinite}
+@keyframes shimmer{to{background-position:-250% 0}}
+.line span:before,.line span:after{content:attr(data-text);position:absolute;left:0;top:0;background:none;opacity:0}
+.line span:before{color:#ff3d7f;-webkit-text-fill-color:#ff3d7f;animation:glitch1 5s infinite}
+.line span:after{color:#39d9ff;-webkit-text-fill-color:#39d9ff;animation:glitch2 5s infinite}
+@keyframes glitch1{0%,92%,100%{opacity:0}93%{opacity:.9;transform:translate(-6px,2px);clip-path:inset(10% 0 60% 0)}95%{opacity:.9;transform:translate(5px,-2px);clip-path:inset(55% 0 12% 0)}97%{opacity:.9;transform:translate(-3px,0);clip-path:inset(30% 0 35% 0)}}
+@keyframes glitch2{0%,92%,100%{opacity:0}94%{opacity:.9;transform:translate(6px,-2px);clip-path:inset(40% 0 30% 0)}96%{opacity:.9;transform:translate(-5px,2px);clip-path:inset(5% 0 70% 0)}98%{opacity:.9;transform:translate(3px,0);clip-path:inset(65% 0 5% 0)}}
+.typed{font-family:Consolas,monospace;font-size:clamp(1rem,2vw,1.35rem);color:var(--accent);margin:2px 0 18px;min-height:1.6em}
+.typed .tp{color:var(--muted)}
+.caret{display:inline-block;width:2px;height:1.1em;background:var(--accent);margin-left:3px;vertical-align:-.15em;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+.btn{position:relative;overflow:hidden;display:inline-block;padding:14px 26px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;text-decoration:none;font-weight:700;box-shadow:0 10px 30px #39d9ff44;transition:transform .25s}
+.btn:hover{transform:translateY(-3px) scale(1.03)}
+.btn:after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,#fff6,transparent);transform:skewX(-20deg);animation:btnshine 3s infinite}
+@keyframes btnshine{to{left:140%}}
+.btn.ghost{background:#39d9ff12;border:1px solid #39d9ff66;box-shadow:none}
+@media(max-width:700px){.fl:nth-child(n+5){display:none}.fl{opacity:.55}.hudtxt{display:none}}
+
+/* Texto intermedio */
+.statement{max-width:1000px;margin:auto;padding:22vh 24px;text-align:center}
+.statement h2{font-size:clamp(1.8rem,4.5vw,3.4rem);line-height:1.2;font-weight:700}
+.statement h2 .w{display:inline-block;opacity:.15}
+.statement em{font-style:normal;color:var(--accent)}
+
+/* SECCIONES CON IMAGEN QUE SE EXPANDE */
+.expand{position:relative;height:100vh;overflow:hidden;background:var(--bg)}
+.bgword{position:absolute;top:50%;left:0;width:100%;transform:translateY(-50%);font-size:clamp(6rem,24vw,22rem);font-weight:900;white-space:nowrap;color:transparent;-webkit-text-stroke:1.5px #ffffff1c;text-transform:uppercase;will-change:transform;pointer-events:none}
+.frame{position:absolute;inset:0;overflow:hidden;clip-path:inset(20% 30% 20% 30% round 28px);will-change:clip-path}
+.media{position:absolute;inset:0;will-change:transform}
+.media svg{width:100%;height:100%}
+.shade{position:absolute;inset:0;background:linear-gradient(180deg,#07111f00 40%,#07111fe6 100%)}
+.caption{position:absolute;left:0;right:0;bottom:0;padding:0 6vw 9vh;max-width:900px;opacity:0}
+.caption small{color:var(--accent);letter-spacing:3px;font-weight:700}
+.caption h3{font-size:clamp(2.2rem,6vw,5rem);margin:8px 0 12px;line-height:1}
+.caption p{color:#d3e3f2;font-size:1.1rem;line-height:1.6;max-width:560px}
+
+/* Tarjetas con parallax a distinta velocidad */
+.cards{max-width:1200px;margin:auto;padding:16vh 22px;display:grid;grid-template-columns:repeat(3,1fr);gap:26px;align-items:start}
+.cards h2{grid-column:1/-1;text-align:center;font-size:clamp(2rem,4vw,3rem);margin-bottom:10px}
+.card{background:linear-gradient(145deg,#0e1d31,#12263f);border:1px solid #ffffff14;border-radius:22px;padding:28px;box-shadow:0 20px 40px #0005}
+.card .ic{font-size:2.6rem}
+.card h4{margin:12px 0 8px;font-size:1.2rem}
+.card p{color:var(--muted);line-height:1.6}
+.card:nth-of-type(2){margin-top:60px}
+.card:nth-of-type(3){margin-top:120px}
+
+/* SIMULADOR */
+.sim{max-width:1200px;margin:auto;padding:12vh 22px 14vh}
+.sim h2{text-align:center;font-size:clamp(2rem,4vw,3rem);margin-bottom:12px}
+.sim .intro{text-align:center;color:var(--muted);max-width:700px;margin:0 auto 40px;line-height:1.6}
+.sim-wrap{display:grid;grid-template-columns:1.35fr 1fr;gap:28px;align-items:stretch}
+.board{background:#06101c;border:1px solid #ffffff16;border-radius:24px;padding:18px;box-shadow:0 20px 45px #0006;position:relative;overflow:hidden}
+.board svg{width:100%;height:auto}
+.wire{fill:none;stroke:#5b7a99;stroke-width:5;stroke-linejoin:round}
+.flow{fill:none;stroke:#39d9ff;stroke-width:5;stroke-dasharray:3 17;stroke-linecap:round;opacity:0;animation:flow 1.5s linear infinite;filter:drop-shadow(0 0 5px #39d9ff)}
+.flow.run{opacity:1}
+@keyframes flow{to{stroke-dashoffset:-20}}
+.lbl{fill:#a9bdd2;font-size:15px;font-family:Segoe UI,Arial,sans-serif;text-anchor:middle}
+.panel{background:linear-gradient(145deg,#0e1d31,#12263f);border:1px solid #ffffff14;border-radius:24px;padding:26px;display:flex;flex-direction:column;gap:18px}
+.panel h3{font-size:1.25rem}
+.ctrl label{display:flex;justify-content:space-between;color:var(--muted);font-size:.95rem;margin-bottom:8px}
+.ctrl label b{color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.sw{padding:14px 20px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:700;font-size:1rem;cursor:pointer}
+.sw.off{background:#263445}
+.sw.ghost{background:transparent;border:1px solid #ff668599;color:#ff9db1}
+.readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ro{background:#08162a;border:1px solid #ffffff10;border-radius:14px;padding:12px;text-align:center}
+.ro small{display:block;color:var(--muted);font-size:.75rem;margin-bottom:4px}
+.ro strong{font-size:1.15rem;color:#fff}
+.msg{min-height:44px;font-size:.95rem;line-height:1.5;color:var(--muted)}
+.msg.warn{color:#ff9db1}
+.formula{font-family:Consolas,monospace;font-size:.9rem;color:#7fe7ff;background:#08162a;border-radius:12px;padding:10px 14px}
+
+/* QUIZ */
+.quiz{max-width:860px;margin:auto;padding:6vh 22px 14vh}
+.quiz h2{text-align:center;font-size:clamp(2rem,4vw,3rem);margin-bottom:12px}
+.quiz .intro{text-align:center;color:var(--muted);max-width:640px;margin:0 auto 36px;line-height:1.6}
+.quiz-box{background:linear-gradient(145deg,#0e1d31,#12263f);border:1px solid #ffffff14;border-radius:26px;padding:30px;box-shadow:0 22px 45px #0006}
+.q-top{display:flex;justify-content:space-between;color:var(--muted);font-size:.95rem;margin-bottom:10px}
+.q-bar{height:8px;border-radius:99px;background:#ffffff14;overflow:hidden;margin-bottom:24px}
+.q-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .5s}
+.q-img{width:170px;height:170px;margin:0 auto 18px;border-radius:26px;background:radial-gradient(circle at 50% 40%,#17406a,#08162a);border:1px solid #39d9ff33;padding:14px;box-shadow:0 0 40px #39d9ff22 inset}
+.q-img svg{width:100%;height:100%}
+.q-text{font-size:1.3rem;font-weight:700;text-align:center;margin-bottom:22px;line-height:1.4}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{display:flex;align-items:center;gap:12px;padding:15px 16px;border-radius:16px;border:1px solid #ffffff1c;background:#0a1a2d;color:#fff;font-size:1rem;text-align:left;cursor:pointer;transition:border-color .2s,background .2s,transform .2s,opacity .3s;font-family:inherit}
+.opt:hover:not(:disabled){border-color:var(--accent);background:#12304a;transform:translateY(-3px)}
+.opt .k{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#39d9ff22;color:var(--accent);font-weight:800;flex:none}
+.opts.img{grid-template-columns:repeat(4,1fr)}
+.opts.img .opt{justify-content:center;padding:14px;aspect-ratio:1}
+.opts.img .opt svg{width:100%;height:100%}
+.opt.correct{border-color:#35e59a;background:#35e59a22;box-shadow:0 0 24px #35e59a55}
+.opt.wrong{border-color:#ff6685;background:#ff668522}
+.opt.dim{opacity:.4}
+.q-fb{min-height:48px;margin-top:18px;line-height:1.55;color:var(--muted);text-align:center}
+.q-fb b.ok{color:#35e59a}.q-fb b.no{color:#ff9db1}
+#qnext{display:block;margin:6px auto 0}
+.q-end{text-align:center;padding:10px 0}
+.q-end .big{font-size:4rem}
+.q-end h3{font-size:1.8rem;margin:10px 0}
+.q-end .score{font-size:3rem;font-weight:800;color:var(--accent)}
+.q-end p{color:var(--muted);margin:10px 0 22px;line-height:1.6}
+@media(max-width:640px){.opts{grid-template-columns:1fr}.opts.img{grid-template-columns:1fr 1fr}}
+
+/* Revisión de respuestas */
+.q-end h4{font-size:1.15rem;margin:8px 0 14px;color:#fff}
+.review{display:grid;gap:12px;text-align:left;margin:0 0 24px}
+.rv{border:1px solid #ffffff14;border-left:4px solid #35e59a;background:#0a1a2d;border-radius:16px;padding:16px 18px}
+.rv.no{border-left-color:#ff6685}
+.rv-q{display:flex;gap:10px;align-items:center;font-weight:700;line-height:1.4;margin-bottom:10px}
+.rv-n{display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:#39d9ff22;color:var(--accent);font-size:.85rem;flex:none}
+.rv-row{display:flex;align-items:center;gap:10px;margin:6px 0;flex-wrap:wrap}
+.rv-l{font-size:.78rem;color:var(--muted);min-width:96px;text-transform:uppercase;letter-spacing:.5px}
+.rv-a{padding:6px 12px;border-radius:10px;background:#ff668522;border:1px solid #ff668566;display:inline-flex;align-items:center}
+.rv.ok .rv-a,.rv-a.good{background:#35e59a22;border-color:#35e59a88}
+.rv-row em{font-style:normal;font-weight:800}
+.rv.ok .rv-row em{color:#35e59a}.rv.no .rv-row em{color:#ff9db1}
+.rv-e{margin-top:8px;color:var(--muted);font-size:.92rem;line-height:1.5}
+svg.mini{width:44px;height:44px}
+svg.minis{width:30px;height:30px;flex:none}
+/* Respaldo sin GSAP: todo visible */
+.nogsap .frame{clip-path:none}
+.nogsap .caption{opacity:1}
+.nogsap .expand{height:80vh}
+.nogsap #boot{display:none}
+.rv-a span{margin-left:8px;font-weight:600}
+[hidden]{display:none!important}
+.key-wrap{margin-top:24px;text-align:center}
+.key-wrap .review{margin-top:18px}
+.sw.alt{background:transparent;border:1px solid #39d9ff77;color:var(--accent)}
+.sw.alt:hover{background:#39d9ff14}
+
+/* Pie con integrantes */
+footer{text-align:center;padding:70px 20px 40px;color:var(--muted);border-top:1px solid #ffffff12}
+.team h3{color:#fff;font-size:1.4rem;margin-bottom:22px}
+.team-list{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;max-width:980px;margin:0 auto 40px}
+.st{display:flex;align-items:center;gap:12px;padding:12px 20px 12px 14px;border-radius:16px;background:linear-gradient(145deg,#0e1d31,#12263f);border:1px solid #39d9ff33;color:#fff;font-weight:600;box-shadow:0 10px 25px #0004}
+.st b{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));font-size:.95rem}
+footer .cr{font-size:.9rem}
+@media(max-width:800px){.sim-wrap{grid-template-columns:1fr}}
+@media(max-width:800px){.cards{grid-template-columns:1fr}.card:nth-of-type(n){margin-top:0}.frame{clip-path:inset(24% 10% 24% 10% round 22px)}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<!-- PANTALLA DE ARRANQUE -->
+<div id="boot"><div class="boot-in">
+  <div class="boot-logo">⚡ Electronova</div>
+  <div class="boot-bar"><i id="bootBar"></i></div>
+  <div class="boot-row"><span id="bootTxt">Iniciando…</span><b id="bootPct">0%</b></div>
+  <ul id="bootLog"></ul>
+</div></div>
+<header><div class="logo">⚡ Electronova</div><span>Tecnología · Noveno Grado</span></header>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <canvas id="circuit"></canvas>
+  <div class="grid-bg" data-speed="0.15"></div>
+  <div class="spot"></div>
+  <div class="layer l1"></div><div class="layer l2"></div>
+  <div class="layer l3"></div><div class="layer l4"></div><div class="layer l5"></div>
+
+  <!-- anillos HUD + ondas -->
+  <div class="hud">
+    <i class="wave"></i><i class="wave" style="animation-delay:1.6s"></i><i class="wave" style="animation-delay:3.2s"></i>
+    <svg viewBox="-400 -400 800 800" aria-hidden="true">
+      <g class="rg1"><circle r="380" fill="none" stroke="#39d9ff" stroke-opacity=".5" stroke-width="3" stroke-dasharray="2 14"/></g>
+      <g class="rg2"><circle r="335" fill="none" stroke="#39d9ff" stroke-opacity=".55" stroke-width="2" stroke-dasharray="140 40 12 40"/></g>
+      <g class="rg3"><circle r="290" fill="none" stroke="#7c5cff" stroke-opacity=".6" stroke-width="3" stroke-dasharray="1 9"/></g>
+      <circle r="250" fill="none" stroke="#ffffff" stroke-opacity=".06"/>
+    </svg>
+  </div>
+
+  <!-- dispositivos flotantes -->
+  <div class="floaters">
+    <div class="fl" data-d="34" style="left:6%;top:16%"><div class="fl-in"><svg viewBox="0 0 120 120"><use href="#i-phone"/></svg></div></div>
+    <div class="fl" data-d="26" style="left:82%;top:14%"><div class="fl-in"><svg viewBox="0 0 120 120"><use href="#i-tv"/></svg></div></div>
+    <div class="fl" data-d="40" style="left:9%;top:72%"><div class="fl-in"><svg viewBox="0 0 120 120"><use href="#i-cam"/></svg></div></div>
+    <div class="fl" data-d="30" style="left:80%;top:70%"><div class="fl-in"><svg viewBox="0 0 120 120"><use href="#i-battery"/></svg></div></div>
+    <div class="fl" data-d="22" style="left:3%;top:44%"><div class="fl-in"><svg viewBox="0 0 120 120"><use href="#i-cpu"/></svg></div></div>
+    <div class="fl" data-d="44" style="left:89%;top:42%"><div class="fl-in"><svg viewBox="0 0 120 120"><use href="#i-speaker"/></svg></div></div>
+    <div class="fl" data-d="18" style="left:62%;top:8%"><div class="fl-in"><svg viewBox="0 0 120 120"><use href="#i-bulb"/></svg></div></div>
+    <div class="fl" data-d="36" style="left:26%;top:84%"><div class="fl-in"><svg viewBox="0 0 120 120"><use href="#i-micro"/></svg></div></div>
+  </div>
+
+  <!-- lecturas HUD -->
+  <div class="hudtxt tl"><b>◉ SYS ONLINE</b><span id="hV">3.30 V</span></div>
+  <div class="hudtxt tr"><b>CPU</b><span id="hC">0x7F3A</span></div>
+  <div class="hudtxt bl"><b>TEMP</b><span id="hT">36 °C</span></div>
+  <div class="hudtxt br"><b>CORRIENTE</b><span id="hI">220 mA</span></div>
+
+  <div class="hero-content">
+    <span class="badge">TECNOLOGÍA · NOVENO GRADO</span>
+    <h1><span class="line"><span data-text="Dispositivos">Dispositivos</span></span><span class="line"><span data-text="Electrónicos">Electrónicos</span></span></h1>
+    <div class="typed"><span class="tp">Descubre: </span><span id="typed"></span><i class="caret"></i></div>
+    <p>Un recorrido visual por los aparatos que usan circuitos y componentes para procesar, controlar y transmitir información.</p>
+    <div class="cta"><a class="btn" href="#tema">Explorar ↓</a><a class="btn ghost" href="#simulador">⚡ Ir al simulador</a></div>
+  </div>
+  <div class="scan"></div>
+</section>
+
+<!-- TEXTO -->
+<section class="statement" id="tema">
+  <h2 id="statement">Cada dispositivo combina <em>energía</em>, <em>circuitos</em> y <em>procesadores</em> para hacer posible la tecnología que usamos todos los días.</h2>
+</section>
+
+<!-- 1. CELULAR -->
+<section class="expand">
+  <div class="bgword">Celular</div>
+  <div class="frame"><div class="media">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1b0f4a"/><stop offset="1" stop-color="#0a5d8a"/></linearGradient>
+        <linearGradient id="s1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#39d9ff"/><stop offset="1" stop-color="#7c5cff"/></linearGradient>
+      </defs>
+      <rect width="1600" height="900" fill="url(#g1)"/>
+      <circle cx="260" cy="180" r="220" fill="#7c5cff" opacity=".35"/><circle cx="1400" cy="760" r="300" fill="#39d9ff" opacity=".25"/>
+      <g transform="translate(1000 80) rotate(8 200 370)">
+        <rect width="400" height="740" rx="56" fill="#0b1220" stroke="#39d9ff" stroke-width="5"/>
+        <rect x="18" y="18" width="364" height="704" rx="42" fill="url(#s1)"/>
+        <rect x="140" y="34" width="120" height="26" rx="13" fill="#0b1220"/>
+        <text x="200" y="170" font-size="92" text-anchor="middle" fill="#fff" font-family="Segoe UI,Arial" font-weight="700">10:42</text>
+        <g fill="#ffffff33"><rect x="55" y="280" width="90" height="90" rx="22"/><rect x="155" y="280" width="90" height="90" rx="22"/><rect x="255" y="280" width="90" height="90" rx="22"/>
+        <rect x="55" y="390" width="90" height="90" rx="22"/><rect x="155" y="390" width="90" height="90" rx="22"/><rect x="255" y="390" width="90" height="90" rx="22"/>
+        <rect x="55" y="500" width="90" height="90" rx="22"/><rect x="155" y="500" width="90" height="90" rx="22"/><rect x="255" y="500" width="90" height="90" rx="22"/></g>
+      </g>
+      <g stroke="#39d9ff" stroke-width="3" fill="none" opacity=".6"><path d="M80 700h300l60-80h200"/><path d="M80 760h220l50 60h260"/><circle cx="640" cy="620" r="10" fill="#39d9ff"/><circle cx="610" cy="820" r="10" fill="#39d9ff"/></g>
+    </svg>
+  </div><div class="shade"></div>
+  <div class="caption"><small>01 · COMUNICACIÓN</small><h3>Celular</h3><p>Combina batería, procesador, pantalla y antenas para comunicarnos y acceder a información desde cualquier lugar.</p></div></div>
+</section>
+
+<!-- 2. COMPUTADORA -->
+<section class="expand">
+  <div class="bgword">Laptop</div>
+  <div class="frame"><div class="media">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#062b3d"/><stop offset="1" stop-color="#2a1260"/></linearGradient>
+        <linearGradient id="s2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f3a5c"/><stop offset="1" stop-color="#39d9ff"/></linearGradient>
+      </defs>
+      <rect width="1600" height="900" fill="url(#g2)"/>
+      <circle cx="1350" cy="150" r="240" fill="#39d9ff" opacity=".22"/><circle cx="200" cy="800" r="260" fill="#7c5cff" opacity=".3"/>
+      <g transform="translate(330 150)">
+        <rect width="940" height="560" rx="30" fill="#0b1220" stroke="#7c5cff" stroke-width="5"/>
+        <rect x="26" y="26" width="888" height="508" rx="14" fill="url(#s2)"/>
+        <g font-family="Consolas,monospace" font-size="30" fill="#eaffff"><text x="70" y="120">function encender() {</text><text x="110" y="170" fill="#35e59a">circuito.cerrar();</text><text x="110" y="220" fill="#ffd36b">lampara.estado = "ON";</text><text x="70" y="270">}</text></g>
+        <path d="M-70 600h1080l-50 60H-20z" fill="#16233a" stroke="#7c5cff" stroke-width="4"/>
+        <rect x="380" y="610" width="180" height="16" rx="8" fill="#0b1220"/>
+      </g>
+      <g fill="#fff" opacity=".7"><circle cx="150" cy="200" r="6"/><circle cx="1480" cy="520" r="6"/><circle cx="1400" cy="800" r="4"/></g>
+    </svg>
+  </div><div class="shade"></div>
+  <div class="caption"><small>02 · COMPUTACIÓN</small><h3>Computadora</h3><p>Procesa datos y ejecuta programas gracias al procesador, la memoria y los circuitos que los conectan.</p></div></div>
+</section>
+
+<!-- 3. CÁMARA -->
+<section class="expand">
+  <div class="bgword">Cámara</div>
+  <div class="frame"><div class="media">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a0f3f"/><stop offset="1" stop-color="#0d3a66"/></linearGradient>
+        <radialGradient id="lens" cx=".4" cy=".35"><stop offset="0" stop-color="#7c5cff"/><stop offset=".5" stop-color="#14224a"/><stop offset="1" stop-color="#050914"/></radialGradient>
+      </defs>
+      <rect width="1600" height="900" fill="url(#g3)"/>
+      <circle cx="1300" cy="200" r="260" fill="#ff6685" opacity=".2"/><circle cx="250" cy="720" r="280" fill="#39d9ff" opacity=".25"/>
+      <g transform="translate(360 190)">
+        <rect x="60" y="0" width="200" height="70" rx="16" fill="#1a2438"/>
+        <rect y="50" width="880" height="500" rx="50" fill="#0f1a2e" stroke="#39d9ff" stroke-width="5"/>
+        <rect x="40" y="90" width="150" height="70" rx="14" fill="#223555"/>
+        <circle cx="560" cy="300" r="210" fill="#0b1220" stroke="#39d9ff" stroke-width="6"/>
+        <circle cx="560" cy="300" r="160" fill="url(#lens)" stroke="#7c5cff" stroke-width="6"/>
+        <circle cx="560" cy="300" r="85" fill="none" stroke="#39d9ff" stroke-width="3" opacity=".7"/>
+        <circle cx="520" cy="255" r="26" fill="#fff" opacity=".55"/>
+        <circle cx="780" cy="130" r="22" fill="#ff6685"/>
+      </g>
+    </svg>
+  </div><div class="shade"></div>
+  <div class="caption"><small>03 · ENTRETENIMIENTO</small><h3>Cámara</h3><p>Un sensor electrónico convierte la luz en señales que se procesan, almacenan o transmiten como imagen.</p></div></div>
+</section>
+
+<!-- 4. RELOJ -->
+<section class="expand">
+  <div class="bgword">Reloj</div>
+  <div class="frame"><div class="media">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g4" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b3b3a"/><stop offset="1" stop-color="#1a1050"/></linearGradient>
+        <linearGradient id="s4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#111c33"/><stop offset="1" stop-color="#0a2a4a"/></linearGradient>
+      </defs>
+      <rect width="1600" height="900" fill="url(#g4)"/>
+      <circle cx="260" cy="200" r="240" fill="#35e59a" opacity=".2"/><circle cx="1400" cy="740" r="300" fill="#7c5cff" opacity=".3"/>
+      <g transform="translate(800 450)">
+        <rect x="-110" y="-480" width="220" height="400" rx="40" fill="#16233a"/>
+        <rect x="-110" y="80" width="220" height="400" rx="40" fill="#16233a"/>
+        <rect x="-190" y="-190" width="380" height="380" rx="90" fill="#0b1220" stroke="#35e59a" stroke-width="6"/>
+        <rect x="-165" y="-165" width="330" height="330" rx="70" fill="url(#s4)"/>
+        <circle cx="0" cy="0" r="115" fill="none" stroke="#35e59a" stroke-width="14" stroke-dasharray="520 720" stroke-linecap="round" transform="rotate(-90)"/>
+        <circle cx="0" cy="0" r="85" fill="none" stroke="#39d9ff" stroke-width="12" stroke-dasharray="300 540" stroke-linecap="round" transform="rotate(-90)"/>
+        <text x="0" y="18" text-anchor="middle" font-size="56" fill="#fff" font-family="Segoe UI,Arial" font-weight="700">72</text>
+        <rect x="190" y="-30" width="22" height="60" rx="10" fill="#223555"/>
+      </g>
+    </svg>
+  </div><div class="shade"></div>
+  <div class="caption"><small>04 · HOGAR Y SALUD</small><h3>Reloj inteligente</h3><p>Integra sensores, comunicación y aplicaciones en un dispositivo pequeño que se lleva en la muñeca.</p></div></div>
+</section>
+
+<!-- TARJETAS -->
+<section class="cards" id="cards">
+  <h2>Componentes principales</h2>
+  <div class="card" data-speed="0"><div class="ic">🔋</div><h4>Batería / fuente</h4><p>Proporciona la energía necesaria para que el circuito funcione.</p></div>
+  <div class="card" data-speed="0"><div class="ic">🧠</div><h4>Procesador</h4><p>Ejecuta instrucciones y procesa información según el diseño del dispositivo.</p></div>
+  <div class="card" data-speed="0"><div class="ic">🖥️</div><h4>Salida</h4><p>Muestra resultados mediante una pantalla, altavoz, luces u otros elementos.</p></div>
+</section>
+
+<!-- SIMULADOR -->
+<section class="sim" id="simulador">
+  <h2>⚡ Simulador de circuito</h2>
+  <p class="intro">Cierra el interruptor y cambia el voltaje de la batería y la resistencia. Observa cómo cambian la corriente y el brillo del foco. ¡Cuidado: demasiada potencia lo quema!</p>
+  <div class="sim-wrap">
+    <div class="board">
+      <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" aria-label="Circuito en serie con batería, interruptor, resistencia y foco">
+        <!-- cables -->
+        <path class="wire" d="M100 60 H500 V260 H100 Z"/>
+        <path class="flow" id="flow" d="M100 60 H500 V260 H100 Z"/>
+
+        <!-- batería (izquierda) -->
+        <rect x="70" y="110" width="60" height="100" fill="#06101c"/>
+        <line x1="75" y1="135" x2="125" y2="135" stroke="#ffd36b" stroke-width="6" stroke-linecap="round"/>
+        <line x1="88" y1="155" x2="112" y2="155" stroke="#ffd36b" stroke-width="6" stroke-linecap="round"/>
+        <line x1="75" y1="175" x2="125" y2="175" stroke="#ffd36b" stroke-width="6" stroke-linecap="round"/>
+        <line x1="88" y1="195" x2="112" y2="195" stroke="#ffd36b" stroke-width="6" stroke-linecap="round"/>
+        <text class="lbl" x="150" y="140" style="fill:#ffd36b">+</text>
+        <text class="lbl" x="150" y="205" style="fill:#ffd36b">−</text>
+        <text class="lbl" x="55" y="165" id="vLabel" style="text-anchor:end;fill:#ffd36b">6 V</text>
+
+        <!-- interruptor (arriba) -->
+        <rect x="250" y="40" width="100" height="40" fill="#06101c"/>
+        <circle cx="255" cy="60" r="6" fill="#5b7a99"/><circle cx="345" cy="60" r="6" fill="#5b7a99"/>
+        <line id="blade" x1="255" y1="60" x2="335" y2="12" stroke="#a9bdd2" stroke-width="6" stroke-linecap="round" style="transition:all .35s"/>
+        <text class="lbl" x="300" y="100">Interruptor</text>
+
+        <!-- resistencia (derecha) -->
+        <rect x="470" y="105" width="60" height="110" fill="#06101c"/>
+        <polyline points="500,105 500,115 484,125 516,141 484,157 516,173 484,189 500,199 500,215" fill="none" stroke="#35e59a" stroke-width="5" stroke-linejoin="round"/>
+        <text class="lbl" x="552" y="165" id="rLabel" style="text-anchor:start;fill:#35e59a">220 Ω</text>
+
+        <!-- foco (abajo) -->
+        <rect x="262" y="235" width="76" height="50" fill="#06101c"/>
+        <circle id="glow" cx="300" cy="260" r="60" fill="#fff59d" opacity="0"/>
+        <circle id="bulb" cx="300" cy="260" r="26" fill="#263445" stroke="#a9bdd2" stroke-width="4"/>
+        <path id="fil" d="M285 266 L292 252 L300 266 L308 252 L315 266" fill="none" stroke="#6c7c8f" stroke-width="3" stroke-linejoin="round"/>
+        <text class="lbl" x="300" y="308">Foco</text>
+      </svg>
+    </div>
+
+    <div class="panel">
+      <h3>Panel de control</h3>
+      <button class="sw off" id="swBtn" type="button">Cerrar interruptor</button>
+      <div class="ctrl"><label>Voltaje de la batería <b id="vOut">6.0 V</b></label><input type="range" id="vIn" min="1.5" max="12" step="0.5" value="6"></div>
+      <div class="ctrl"><label>Resistencia <b id="rOut">220 Ω</b></label><input type="range" id="rIn" min="10" max="1000" step="10" value="220"></div>
+      <div class="readouts">
+        <div class="ro"><small>Corriente</small><strong id="iRo">0 mA</strong></div>
+        <div class="ro"><small>Potencia</small><strong id="pRo">0.00 W</strong></div>
+        <div class="ro"><small>Brillo</small><strong id="bRo">0 %</strong></div>
+      </div>
+      <div class="formula">I = V ÷ R &nbsp;·&nbsp; P = V × I</div>
+      <div class="msg" id="msg">El circuito está abierto: no circula corriente.</div>
+      <button class="sw ghost" id="resetBtn" type="button" style="display:none">🔧 Cambiar foco</button>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section class="quiz" id="quiz">
+  <h2>🧠 Quiz con imágenes</h2>
+  <p class="intro">Observa cada imagen y elige la respuesta correcta. ¡Comprueba cuánto aprendiste sobre dispositivos electrónicos!</p>
+  <div class="quiz-box" id="quizBox"></div>
+  <div class="key-wrap">
+    <button class="sw alt" id="keyBtn" type="button">👁 Ver respuestas correctas</button>
+    <div class="review" id="keyList" hidden></div>
+  </div>
+</section>
+
+<!-- Íconos del quiz -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-cpu" viewBox="0 0 120 120">
+    <g stroke="#39d9ff" stroke-width="4" stroke-linecap="round"><path d="M42 12v18M60 12v18M78 12v18M42 90v18M60 90v18M78 90v18M12 42h18M12 60h18M12 78h18M90 42h18M90 60h18M90 78h18"/></g>
+    <rect x="28" y="28" width="64" height="64" rx="10" fill="#0b1a2e" stroke="#39d9ff" stroke-width="4"/>
+    <rect x="44" y="44" width="32" height="32" rx="6" fill="#7c5cff"/><circle cx="60" cy="60" r="6" fill="#fff"/>
+  </symbol>
+  <symbol id="i-phone" viewBox="0 0 120 120">
+    <rect x="34" y="8" width="52" height="104" rx="12" fill="#0b1a2e" stroke="#39d9ff" stroke-width="4"/>
+    <rect x="40" y="20" width="40" height="80" rx="5" fill="#39d9ff" opacity=".35"/>
+    <rect x="52" y="12" width="16" height="4" rx="2" fill="#39d9ff"/><circle cx="60" cy="106" r="3" fill="#39d9ff"/>
+    <rect x="46" y="32" width="12" height="12" rx="3" fill="#fff" opacity=".6"/><rect x="62" y="32" width="12" height="12" rx="3" fill="#fff" opacity=".6"/><rect x="46" y="50" width="12" height="12" rx="3" fill="#fff" opacity=".6"/><rect x="62" y="50" width="12" height="12" rx="3" fill="#fff" opacity=".6"/>
+  </symbol>
+  <symbol id="i-micro" viewBox="0 0 120 120">
+    <rect x="8" y="30" width="104" height="62" rx="8" fill="#0b1a2e" stroke="#39d9ff" stroke-width="4"/>
+    <rect x="16" y="38" width="58" height="46" rx="5" fill="#ffd36b" opacity=".35" stroke="#ffd36b" stroke-width="2"/>
+    <circle cx="94" cy="48" r="7" fill="#7c5cff"/><rect x="85" y="62" width="18" height="6" rx="3" fill="#39d9ff"/><rect x="85" y="74" width="18" height="6" rx="3" fill="#39d9ff"/>
+  </symbol>
+  <symbol id="i-cam" viewBox="0 0 120 120">
+    <rect x="38" y="24" width="26" height="14" rx="4" fill="#223555"/>
+    <rect x="8" y="34" width="104" height="66" rx="12" fill="#0b1a2e" stroke="#39d9ff" stroke-width="4"/>
+    <circle cx="60" cy="67" r="23" fill="#14224a" stroke="#7c5cff" stroke-width="4"/><circle cx="60" cy="67" r="12" fill="#39d9ff" opacity=".5"/><circle cx="53" cy="60" r="4" fill="#fff"/>
+    <circle cx="97" cy="48" r="4" fill="#ff6685"/>
+  </symbol>
+  <symbol id="i-tv" viewBox="0 0 120 120">
+    <rect x="8" y="20" width="104" height="70" rx="8" fill="#0b1a2e" stroke="#39d9ff" stroke-width="4"/>
+    <rect x="16" y="28" width="88" height="54" rx="4" fill="#7c5cff" opacity=".5"/><path d="M40 70l18-26 14 18 10-12 16 20z" fill="#39d9ff" opacity=".7"/>
+    <path d="M38 104h44M60 90v14" stroke="#39d9ff" stroke-width="4" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-battery" viewBox="0 0 120 120">
+    <rect x="10" y="36" width="84" height="48" rx="8" fill="#0b1a2e" stroke="#ffd36b" stroke-width="4"/>
+    <rect x="94" y="52" width="12" height="16" rx="3" fill="#ffd36b"/>
+    <rect x="18" y="44" width="18" height="32" rx="3" fill="#35e59a"/><rect x="40" y="44" width="18" height="32" rx="3" fill="#35e59a"/><rect x="62" y="44" width="18" height="32" rx="3" fill="#35e59a" opacity=".4"/>
+    <path d="M40 22h14M47 15v14" stroke="#ffd36b" stroke-width="4" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-speaker" viewBox="0 0 120 120">
+    <rect x="28" y="8" width="64" height="104" rx="12" fill="#0b1a2e" stroke="#39d9ff" stroke-width="4"/>
+    <circle cx="60" cy="34" r="9" fill="#39d9ff"/>
+    <circle cx="60" cy="78" r="23" fill="#14224a" stroke="#7c5cff" stroke-width="4"/><circle cx="60" cy="78" r="10" fill="#7c5cff"/>
+  </symbol>
+  <symbol id="i-resistor" viewBox="0 0 120 120">
+    <path d="M6 60h24l8-24 16 48 16-48 16 48 8-24h20" fill="none" stroke="#35e59a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-bulb" viewBox="0 0 120 120">
+    <circle cx="60" cy="50" r="32" fill="#fff59d" opacity=".25"/>
+    <circle cx="60" cy="50" r="28" fill="#0b1a2e" stroke="#fff59d" stroke-width="4"/>
+    <path d="M48 62l6-16 6 16 6-16 6 16" fill="none" stroke="#fff59d" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="48" y="80" width="24" height="10" rx="3" fill="#a9bdd2"/><rect x="51" y="92" width="18" height="8" rx="3" fill="#a9bdd2"/>
+  </symbol>
+</defs></svg>
+
+<footer>
+  <div class="team">
+    <h3>👩‍💻 Integrantes</h3>
+    <div class="team-list">
+      <div class="st"><b>1</b>Griselda Torres</div>
+      <div class="st"><b>2</b>Zabdy Guzman</div>
+      <div class="st"><b>3</b>Genesis Andres</div>
+      <div class="st"><b>4</b>Diana Miranda</div>
+      <div class="st"><b>5</b>Santos Majano</div>
+    </div>
+  </div>
+  <p class="cr">⚡ Electronova · Proyecto educativo de Tecnología · Noveno Grado</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<!-- Respaldo: si cdnjs falla, se intenta con jsDelivr -->
+<script>if(!window.gsap) document.write('<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"><\/script>');</script>
+<script>if(!window.ScrollTrigger) document.write('<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"><\/script>');</script>
+<script>
+// Si GSAP no carga, la página sigue funcionando (sin animaciones) y el quiz/simulador se ven igual
+const HAS_GSAP = !!(window.gsap && window.ScrollTrigger);
+if (HAS_GSAP) gsap.registerPlugin(ScrollTrigger); else document.documentElement.classList.add("nogsap");
+const mm = HAS_GSAP ? gsap.matchMedia() : {add(){}};
+
+mm.add("(prefers-reduced-motion: no-preference)", () => {
+
+  // Barra de progreso
+  gsap.to("#progress", {scaleX:1, ease:"none",
+    scrollTrigger:{trigger:document.body, start:"top top", end:"bottom bottom", scrub:0.3}});
+
+  // HERO: capas parallax a diferentes velocidades
+  const heroST = {trigger:"#hero", start:"top top", end:"bottom top", scrub:true};
+  gsap.to(".grid-bg",      {yPercent:25, ease:"none", scrollTrigger:heroST});
+  gsap.to(".l1",           {y:220, x:80,  ease:"none", scrollTrigger:heroST});
+  gsap.to(".l2",           {y:-160, x:-60, ease:"none", scrollTrigger:heroST});
+  gsap.to(".l3",           {y:-300, ease:"none", scrollTrigger:heroST});
+  gsap.to(".l4",           {y:-180, ease:"none", scrollTrigger:heroST});
+  gsap.to(".l5",           {y:-420, ease:"none", scrollTrigger:heroST});
+  gsap.to(".hero-content", {y:140, opacity:0, ease:"none", scrollTrigger:heroST});
+  gsap.to(".floaters",     {yPercent:-35, ease:"none", scrollTrigger:heroST});
+  gsap.to(".hud",          {scale:1.4, opacity:0, ease:"none", scrollTrigger:heroST});
+
+  // TEXTO: palabras que se iluminan al avanzar el scroll
+  const st = document.getElementById("statement");
+  st.innerHTML = st.innerHTML.replace(/(<em>.*?<\/em>)|([^<\s]+)/g,
+    (m, em, w) => em ? em.replace(/>(.*?)</, '><span class="w">$1</span><') : `<span class="w">${w}</span>`);
+  gsap.to("#statement .w", {opacity:1, stagger:0.08, ease:"none",
+    scrollTrigger:{trigger:".statement", start:"top 75%", end:"bottom 55%", scrub:true}});
+
+  // IMÁGENES QUE SE EXPANDEN
+  gsap.utils.toArray(".expand").forEach((sec, i) => {
+    const frame = sec.querySelector(".frame");
+    const media = sec.querySelector(".media");
+    const cap   = sec.querySelector(".caption");
+    const word  = sec.querySelector(".bgword");
+
+    const tl = gsap.timeline({
+      defaults:{ease:"none"},
+      scrollTrigger:{trigger:sec, start:"top top", end:"+=160%", pin:true, scrub:1, anticipatePin:1}
+    });
+
+    tl.to(frame, {clipPath:"inset(0% 0% 0% 0% round 0px)", duration:1})        // la imagen se expande
+      .fromTo(media, {scale:1.4, yPercent:8}, {scale:1, yPercent:0, duration:1}, 0) // parallax interno
+      .fromTo(word, {xPercent: i % 2 ? -25 : 0}, {xPercent: i % 2 ? 0 : -25, duration:1}, 0) // palabra de fondo
+      .to(cap, {opacity:1, y:0, duration:0.4}, 0.65)
+      .set(cap, {y:50}, 0);
+  });
+
+  // SIMULADOR: entrada suave
+  gsap.from(".sim h2, .sim .intro", {y:50, opacity:0, stagger:0.12,
+    scrollTrigger:{trigger:".sim", start:"top 80%", toggleActions:"play none none none"}});
+  gsap.from(".board, .panel", {y:90, opacity:0, stagger:0.15, duration:0.9, ease:"power3.out",
+    scrollTrigger:{trigger:".sim-wrap", start:"top 85%", toggleActions:"play none none none"}});
+
+  // QUIZ: entrada suave
+  gsap.from(".quiz h2, .quiz .intro, .quiz-box", {y:60, opacity:0, stagger:0.12, duration:0.8, ease:"power3.out",
+    scrollTrigger:{trigger:".quiz", start:"top 80%", toggleActions:"play none none none"}});
+
+  // INTEGRANTES: entrada escalonada
+  gsap.from(".team h3, .st", {y:40, opacity:0, stagger:0.1, duration:0.7, ease:"back.out(1.5)",
+    scrollTrigger:{trigger:"footer", start:"top 85%", toggleActions:"play none none none"}});
+
+  // TARJETAS: entran a distinta velocidad (parallax)
+  gsap.utils.toArray(".card").forEach((c, i) => {
+    gsap.fromTo(c, {y:120 + i*50, opacity:0}, {y:0, opacity:1, ease:"power2.out",
+      scrollTrigger:{trigger:"#cards", start:"top 80%", end:"top 25%", scrub:1}});
+  });
+});
+
+// Si el usuario prefiere menos movimiento: sin animaciones, imágenes ya expandidas
+mm.add("(prefers-reduced-motion: reduce)", () => {
+  gsap.set(".frame", {clipPath:"inset(0% 0% 0% 0% round 0px)"});
+  gsap.set(".caption", {opacity:1});
+  gsap.set("#statement .w", {opacity:1});
+});
+
+// ===== SIMULADOR DE CIRCUITO =====
+(function(){
+  const LIMIT = 2; // potencia máxima del foco (W)
+  const $ = id => document.getElementById(id);
+  const st = {on:false, burnt:false};
+
+  function update(){
+    const V = parseFloat($("vIn").value), R = parseFloat($("rIn").value);
+    $("vOut").textContent = V.toFixed(1) + " V";  $("vLabel").textContent = V % 1 ? V.toFixed(1) + " V" : V + " V";
+    $("rOut").textContent = R + " Ω";            $("rLabel").textContent = R + " Ω";
+
+    let I = V / R, P = V * I;
+    if (st.on && !st.burnt && P > LIMIT) st.burnt = true;
+
+    const live = st.on && !st.burnt;
+    const bright = live ? Math.min(1, Math.sqrt(P / LIMIT)) : 0;
+
+    // interruptor
+    $("blade").setAttribute("x2", st.on ? 345 : 335);
+    $("blade").setAttribute("y2", st.on ? 60 : 12);
+    $("swBtn").textContent = st.on ? "Abrir interruptor" : "Cerrar interruptor";
+    $("swBtn").classList.toggle("off", !st.on);
+
+    // foco
+    const bulb = $("bulb"), glow = $("glow"), fil = $("fil");
+    if (st.burnt){
+      bulb.setAttribute("fill", "#1b1f27"); bulb.setAttribute("stroke", "#ff6685");
+      fil.setAttribute("d", "M285 266 L292 252 L298 262 M304 258 L308 252 L315 266");
+      fil.setAttribute("stroke", "#ff6685"); glow.setAttribute("opacity", 0);
+    } else {
+      fil.setAttribute("d", "M285 266 L292 252 L300 266 L308 252 L315 266");
+      bulb.setAttribute("stroke", "#a9bdd2");
+      bulb.setAttribute("fill", live ? `rgb(${Math.round(60+195*bright)},${Math.round(70+175*bright)},${Math.round(80+70*bright)})` : "#263445");
+      fil.setAttribute("stroke", live ? "#fff" : "#6c7c8f");
+      glow.setAttribute("opacity", (bright * 0.75).toFixed(2));
+      glow.setAttribute("r", 40 + bright * 50);
+    }
+
+    // flujo de corriente
+    const flow = $("flow");
+    flow.classList.toggle("run", live);
+    flow.style.animationDuration = Math.max(0.2, 2.6 / (1 + I * 12)) + "s";
+
+    // lecturas
+    $("iRo").textContent = live ? (I * 1000).toFixed(0) + " mA" : "0 mA";
+    $("pRo").textContent = live ? P.toFixed(2) + " W" : "0.00 W";
+    $("bRo").textContent = Math.round(bright * 100) + " %";
+
+    // mensajes
+    const msg = $("msg"); msg.classList.toggle("warn", st.burnt);
+    $("resetBtn").style.display = st.burnt ? "block" : "none";
+    if (st.burnt) msg.textContent = "¡Se quemó el foco! Pasó demasiada potencia (" + P.toFixed(1) + " W). Sube la resistencia o baja el voltaje y cambia el foco.";
+    else if (!st.on) msg.textContent = "El circuito está abierto: no circula corriente.";
+    else if (P > LIMIT * 0.8) msg.textContent = "⚠️ Cuidado: el foco está cerca de su límite de potencia.";
+    else msg.textContent = "Circuito cerrado: la corriente circula y el foco se enciende. Más resistencia = menos corriente = menos brillo.";
+  }
+
+  $("swBtn").addEventListener("click", () => { st.on = !st.on; update(); });
+  $("resetBtn").addEventListener("click", () => { st.burnt = false; st.on = false; update(); });
+  $("vIn").addEventListener("input", update);
+  $("rIn").addEventListener("input", update);
+  update();
+})();
+
+// ===== QUIZ CON IMÁGENES =====
+(function(){
+  const Q = [
+    {q:"¿Cómo se llama este componente?", img:"i-cpu", type:"text",
+     opts:["Batería","Procesador","Altavoz","Pantalla"], c:1,
+     exp:"El procesador ejecuta instrucciones y procesa la información del dispositivo."},
+    {q:"¿Cuál de estos dispositivos es de comunicación?", type:"img",
+     opts:["i-micro","i-tv","i-phone","i-bulb"], c:2,
+     exp:"El celular permite enviar y recibir información. El microondas es de hogar y la TV de entretenimiento."},
+    {q:"¿Qué función cumple este componente?", img:"i-battery", type:"text",
+     opts:["Proporciona la energía al circuito","Muestra imágenes al usuario","Procesa instrucciones","Emite sonido"], c:0,
+     exp:"La batería (o fuente) entrega la energía que necesita el circuito para funcionar."},
+    {q:"¿Cuál de estos es un componente de salida?", type:"img",
+     opts:["i-battery","i-cpu","i-resistor","i-speaker"], c:3,
+     exp:"El altavoz presenta resultados al usuario en forma de sonido. Las pantallas y luces también son salidas."},
+    {q:"Si el circuito está cerrado, ¿qué le pasa al foco?", img:"i-bulb", type:"text",
+     opts:["Se apaga","Se enciende","Se queda sin filamento","Desaparece la corriente"], c:1,
+     exp:"Con el circuito cerrado la corriente puede circular y el foco se enciende."}
+  ];
+  const box = document.getElementById("quizBox");
+  const anim = window.gsap && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let qi = 0, score = 0, answers = [];
+
+  // Muestra una opción como texto o como imagen
+  const names = {"i-cpu":"Procesador","i-phone":"Celular","i-micro":"Microondas","i-cam":"Cámara","i-tv":"Televisor","i-battery":"Batería","i-speaker":"Altavoz","i-resistor":"Resistencia","i-bulb":"Foco"};
+  const txtOf = (x, i) => x.type === "img" ? names[x.opts[i]] : x.opts[i];
+  const show = (x, i) => x.type === "img"
+    ? `<svg class="mini" viewBox="0 0 120 120"><use href="#${x.opts[i]}"/></svg><span>${names[x.opts[i]]}</span>`
+    : x.opts[i];
+
+  function render(){
+    const x = Q[qi];
+    let h = `<div class="q-top"><span>Pregunta ${qi+1} de ${Q.length}</span><span>⭐ ${score} pts</span></div>
+             <div class="q-bar"><i style="width:${(qi/Q.length)*100}%"></i></div>`;
+    if (x.img) h += `<div class="q-img"><svg viewBox="0 0 120 120"><use href="#${x.img}"/></svg></div>`;
+    h += `<div class="q-text">${x.q}</div><div class="opts ${x.type==='img'?'img':''}">`;
+    h += x.opts.map((o,i)=> x.type==='img'
+      ? `<button class="opt" data-i="${i}" aria-label="Opción ${'ABCD'[i]}"><svg viewBox="0 0 120 120"><use href="#${o}"/></svg></button>`
+      : `<button class="opt" data-i="${i}"><span class="k">${'ABCD'[i]}</span>${o}</button>`).join("");
+    h += `</div><div class="q-fb" id="qfb"></div><button class="sw" id="qnext" style="display:none"></button>`;
+    box.innerHTML = h;
+    box.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => pick(+b.dataset.i)));
+    if (anim){
+      gsap.from(box.querySelectorAll(".q-img, .q-text"), {y:24, opacity:0, stagger:.1, duration:.5, ease:"power2.out", clearProps:"opacity,transform"});
+      gsap.from(box.querySelectorAll(".opt"), {y:30, opacity:0, stagger:.08, duration:.5, delay:.15, ease:"back.out(1.4)", clearProps:"opacity,transform"});
+    }
+  }
+
+  function pick(i){
+    const x = Q[qi], btns = [...box.querySelectorAll(".opt")];
+    btns.forEach(b => b.disabled = true);
+    const ok = i === x.c;
+    answers[qi] = i;
+    if (ok) score++;
+    btns[x.c].classList.add("correct");
+    if (!ok){ btns[i].classList.add("wrong"); }
+    btns.forEach((b,k)=>{ if(k!==x.c && k!==i) b.classList.add("dim"); });
+    box.querySelector(".q-top span:last-child").textContent = `⭐ ${score} pts`;
+    box.querySelector(".q-bar i").style.width = ((qi+1)/Q.length*100) + "%";
+    document.getElementById("qfb").innerHTML = ok
+      ? `<b class="ok">¡Correcto! 🎉</b> Respuesta: <b class="ok">${txtOf(x,x.c)}</b>. ${x.exp}`
+      : `<b class="no">Casi 😅</b> La respuesta correcta es: <b class="ok">${txtOf(x,x.c)}</b>. ${x.exp}`;
+    const nx = document.getElementById("qnext");
+    nx.textContent = qi < Q.length-1 ? "Siguiente →" : "Ver resultado 🏁";
+    nx.style.display = "block";
+    nx.addEventListener("click", () => { qi++; qi < Q.length ? render() : finish(); });
+    if (anim){
+      if (ok) gsap.fromTo(btns[i], {scale:.94}, {scale:1, duration:.6, ease:"elastic.out(1,.4)"});
+      else gsap.fromTo(btns[i], {x:-10}, {x:0, duration:.6, ease:"elastic.out(1,.3)"});
+      gsap.from("#qfb, #qnext", {y:14, opacity:0, duration:.4, stagger:.1});
+    }
+  }
+
+  function finish(){
+    const pct = score / Q.length;
+    const [emo, title, txt] = pct === 1 ? ["🏆","¡Experto en electrónica!","Respondiste todo bien. Ya dominas los dispositivos electrónicos."]
+      : pct >= 0.6 ? ["🎉","¡Muy buen trabajo!","Vas muy bien. Repasa el simulador y vuelve a intentarlo para lograr el puntaje perfecto."]
+      : ["📚","¡Sigue practicando!","Explora de nuevo las secciones y juega con el simulador; luego repite el quiz."];
+    box.innerHTML = `<div class="q-end"><div class="big">${emo}</div><h3>${title}</h3>
+      <div class="score"><span id="sc">0</span>/${Q.length}</div><p>${txt}</p>
+      <h4>📋 Revisión de tus respuestas</h4>
+      <div class="review">${Q.map((x,k) => {
+        const a = answers[k], ok = a === x.c;
+        return `<div class="rv ${ok ? 'ok' : 'no'}">
+          <div class="rv-q"><span class="rv-n">${k+1}</span>${x.img ? `<svg class="minis" viewBox="0 0 120 120"><use href="#${x.img}"/></svg>` : ""}<span>${x.q}</span></div>
+          <div class="rv-row"><span class="rv-l">Tu respuesta</span><span class="rv-a">${show(x,a)}</span><em>${ok ? "✔ Correcta" : "✘ Incorrecta"}</em></div>
+          ${ok ? "" : `<div class="rv-row"><span class="rv-l">Respuesta correcta</span><span class="rv-a good">${show(x,x.c)}</span></div>`}
+          <div class="rv-e">${x.exp}</div></div>`;
+      }).join("")}</div>
+      <button class="sw" id="again">Repetir quiz</button></div>`;
+    document.getElementById("again").addEventListener("click", () => { qi = 0; score = 0; answers = []; render(); });
+    if (anim) gsap.from(".rv", {y:24, opacity:0, stagger:.12, duration:.5, delay:.5, ease:"power2.out"});
+    const sc = document.getElementById("sc");
+    if (anim){
+      const o = {v:0};
+      gsap.to(o, {v:score, duration:1, ease:"power1.out", onUpdate:()=> sc.textContent = Math.round(o.v)});
+      gsap.from(".q-end .big", {scale:0, rotate:-30, duration:.7, ease:"back.out(2)"});
+    } else sc.textContent = score;
+  }
+
+  render();
+
+  // Botón "Ver respuestas correctas": clave con todas las preguntas
+  const keyBtn = document.getElementById("keyBtn"), keyList = document.getElementById("keyList");
+  keyList.innerHTML = Q.map((x,k) => `<div class="rv ok">
+      <div class="rv-q"><span class="rv-n">${k+1}</span>${x.img ? `<svg class="minis" viewBox="0 0 120 120"><use href="#${x.img}"/></svg>` : ""}<span>${x.q}</span></div>
+      <div class="rv-row"><span class="rv-l">Respuesta correcta</span><span class="rv-a good">${show(x,x.c)}</span></div>
+      <div class="rv-e">${x.exp}</div></div>`).join("");
+  keyBtn.addEventListener("click", () => {
+    const open = keyList.hasAttribute("hidden");
+    if (open){
+      keyList.removeAttribute("hidden");
+      if (anim) gsap.from(keyList.children, {y:20, opacity:0, stagger:.08, duration:.45, ease:"power2.out"});
+    } else keyList.setAttribute("hidden", "");
+    keyBtn.textContent = open ? "🙈 Ocultar respuestas" : "👁 Ver respuestas correctas";
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  });
+})();
+
+// ===== PORTADA ANIMADA =====
+(function(){
+  const $ = s => document.querySelector(s);
+  const R = (a,b) => a + Math.random()*(b-a);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const hero = $("#hero"), cv = $("#circuit"), ctx = cv.getContext("2d");
+  const ring = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
+  let W = 0, H = 0, paths = [], pulses = [], running = false, last = 0;
+
+  // --- Tablero de circuitos con pulsos de energía ---
+  function build(){
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = hero.clientWidth; H = hero.clientHeight;
+    cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    const G = 56, n = Math.max(10, Math.round(W*H/34000));
+    paths = []; pulses = [];
+    for (let i = 0; i < n; i++){
+      let x = Math.round(R(0,W)/G)*G, y = Math.round(R(0,H)/G)*G, d = Math.floor(R(0,8));
+      const pts = [[x,y]], segs = Math.floor(R(3,8));
+      for (let s = 0; s < segs; s++){
+        const len = Math.floor(R(1,4))*G;
+        x += ring[d][0]*len; y += ring[d][1]*len; pts.push([x,y]);
+        d = (d + [1,-1,1,-1,2,-2][Math.floor(R(0,6))] + 8) % 8;
+      }
+      const cum = [0];
+      for (let k = 1; k < pts.length; k++) cum.push(cum[k-1] + Math.hypot(pts[k][0]-pts[k-1][0], pts[k][1]-pts[k-1][1]));
+      const p = {pts, cum, total: cum[cum.length-1]};
+      paths.push(p);
+      pulses.push({p, s:R(0,p.total), v:R(90,210), c: Math.random() < .7 ? "57,217,255" : "124,92,255"});
+    }
+  }
+  function pointAt(p, s){
+    let k = 1; while (k < p.cum.length-1 && p.cum[k] < s) k++;
+    const t = (s - p.cum[k-1]) / ((p.cum[k]-p.cum[k-1]) || 1), a = p.pts[k-1], b = p.pts[k];
+    return [a[0] + (b[0]-a[0])*t, a[1] + (b[1]-a[1])*t];
+  }
+  function draw(dt){
+    ctx.clearRect(0,0,W,H);
+    ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(57,217,255,.14)";
+    paths.forEach(p => { ctx.beginPath(); p.pts.forEach((q,i) => i ? ctx.lineTo(q[0],q[1]) : ctx.moveTo(q[0],q[1])); ctx.stroke(); });
+    ctx.strokeStyle = "rgba(57,217,255,.38)";
+    paths.forEach(p => [p.pts[0], p.pts[p.pts.length-1]].forEach(q => { ctx.beginPath(); ctx.arc(q[0],q[1],4,0,6.283); ctx.stroke(); }));
+    if (reduce) return;
+    pulses.forEach(pu => {
+      pu.s += pu.v*dt; if (pu.s > pu.p.total + 90) pu.s = -20;
+      for (let k = 15; k >= 0; k--){
+        const s = pu.s - k*5; if (s < 0 || s > pu.p.total) continue;
+        const q = pointAt(pu.p, s);
+        ctx.fillStyle = `rgba(${pu.c},${(1-k/16)*.85})`;
+        if (k === 0){ ctx.shadowBlur = 14; ctx.shadowColor = `rgb(${pu.c})`; }
+        ctx.beginPath(); ctx.arc(q[0],q[1],2.8*(1-k/22),0,6.283); ctx.fill();
+        if (k === 0) ctx.shadowBlur = 0;
+      }
+    });
+  }
+  function frame(t){
+    if (!running) return;
+    const dt = Math.min(.05, (t-last)/1000); last = t;
+    draw(dt); requestAnimationFrame(frame);
+  }
+  build(); draw(0);
+  if (!reduce){
+    new IntersectionObserver(es => {
+      const vis = es[0].isIntersecting;
+      if (vis && !running){ running = true; last = performance.now(); requestAnimationFrame(frame); }
+      else if (!vis) running = false;
+    }).observe(hero);
+  }
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { build(); draw(0); }, 200); });
+
+  // --- Texto que se escribe ---
+  const words = ["Celulares","Computadoras","Cámaras digitales","Relojes inteligentes","Circuitos y procesadores","Baterías y fuentes de energía"];
+  const el = $("#typed"); let wi = 0, ci = 0, del = false;
+  (function type(){
+    const w = words[wi];
+    if (reduce){ el.textContent = w; return; }
+    el.textContent = w.slice(0,ci);
+    if (!del && ci < w.length){ ci++; setTimeout(type,70); }
+    else if (!del){ del = true; setTimeout(type,1300); }
+    else if (ci > 0){ ci--; setTimeout(type,35); }
+    else { del = false; wi = (wi+1) % words.length; setTimeout(type,250); }
+  })();
+
+  // --- Lecturas HUD cambiantes ---
+  if (!reduce) setInterval(() => {
+    $("#hV").textContent = R(3.1,5.0).toFixed(2) + " V";
+    $("#hC").textContent = "0x" + Math.floor(R(4096,65535)).toString(16).toUpperCase();
+    $("#hT").textContent = Math.round(R(33,47)) + " °C";
+    $("#hI").textContent = Math.round(R(120,480)) + " mA";
+  }, 900);
+
+  // --- Parallax con el mouse + foco de luz ---
+  if (!reduce && window.gsap && matchMedia("(pointer:fine)").matches){
+    const fls = [...document.querySelectorAll(".fl")].map(e => ({
+      x: gsap.quickTo(e,"x",{duration:.8,ease:"power3"}), y: gsap.quickTo(e,"y",{duration:.8,ease:"power3"}), d: +e.dataset.d}));
+    const hud = $(".hud"), hx = gsap.quickTo(hud,"x",{duration:1.2,ease:"power3"}), hy = gsap.quickTo(hud,"y",{duration:1.2,ease:"power3"});
+    hero.addEventListener("mousemove", e => {
+      const r = hero.getBoundingClientRect(), nx = (e.clientX-r.left)/r.width - .5, ny = (e.clientY-r.top)/r.height - .5;
+      fls.forEach(f => { f.x(nx*f.d*-2); f.y(ny*f.d*-2); });
+      hx(nx*-30); hy(ny*-30);
+      hero.style.setProperty("--mx", (nx+.5)*100 + "%"); hero.style.setProperty("--my", (ny+.5)*100 + "%");
+    });
+  }
+
+  // --- Arranque + entrada de la portada ---
+  if (reduce || !window.gsap){ $("#boot").remove(); return; }
+  const html = document.documentElement;
+  html.style.overflow = "hidden"; window.scrollTo(0,0);
+
+  const floats = () => document.querySelectorAll(".fl-in").forEach((e,i) =>
+    gsap.to(e, {y: i%2 ? -16 : 16, rotation: i%2 ? 6 : -6, duration:R(2.6,4.2), repeat:-1, yoyo:true, ease:"sine.inOut", delay:R(0,1.5)}));
+
+  const tl = gsap.timeline({paused:true, defaults:{ease:"power3.out"}});
+  tl.from("#circuit", {opacity:0, duration:1.6}, 0)
+    .from(".hud svg", {scale:.5, opacity:0, rotation:-40, duration:1.9}, 0)
+    .from(".badge", {y:-24, opacity:0, duration:.7}, .2)
+    .from(".line span", {yPercent:115, duration:1.1, stagger:.15, ease:"power4.out"}, .3)
+    .from(".typed, .hero p, .cta", {y:30, opacity:0, duration:.8, stagger:.12}, .9)
+    .from(".fl", {scale:0, opacity:0, rotation:-60, duration:1, stagger:.09, ease:"back.out(1.7)"}, .5)
+    .from(".hudtxt", {opacity:0, duration:.8, stagger:.1}, 1.2)
+    .add(floats, 1.4);
+
+  const msgs = [[0,"Iniciando Electronova…"],[20,"Cargando batería…"],[40,"Conectando circuitos…"],[60,"Activando procesador…"],[80,"Calibrando pantalla…"],[100,"¡Sistema listo!"]];
+  const log = $("#bootLog"), bar = $("#bootBar"), pct = $("#bootPct"), txt = $("#bootTxt"), o = {v:0};
+  let mi = 0;
+  gsap.to(o, {v:100, duration:2.8, ease:"power1.inOut",
+    onUpdate(){
+      const v = Math.round(o.v); pct.textContent = v + "%"; bar.style.width = v + "%";
+      while (mi < msgs.length && v >= msgs[mi][0]){
+        const li = document.createElement("li"); li.textContent = msgs[mi][1]; log.appendChild(li); txt.textContent = msgs[mi][1]; mi++;
+      }
+    },
+    onComplete(){
+      gsap.timeline()
+        .to(".boot-in", {scale:1.08, opacity:0, duration:.5, ease:"power2.in"})
+        .to("#boot", {yPercent:-100, duration:1, ease:"power4.inOut", onStart:() => tl.play()}, "-=.1")
+        .add(() => { $("#boot").remove(); html.style.overflow = ""; ScrollTrigger.refresh(); });
+    }
+  });
+})();
+
+window.addEventListener("load", () => { if (window.ScrollTrigger) ScrollTrigger.refresh(); });
+</script>
+</body>
+</html>
